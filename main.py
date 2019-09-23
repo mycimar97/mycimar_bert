@@ -97,3 +97,11 @@ pprint(bert_funcs.print_topics_modelling(
         n_words=30,
         return_df=True,
     ))
+bert_funcs.print_topics_modelling(
+        n_topics,
+        feature_names=np.array(features),
+        sorting=np.argsort(components)[:, ::-1],
+        n_words=30,
+        return_df=True,
+    ).to_csv("topics_bert.csv", encoding="utf-8")
+pprint("process done.")
