@@ -38,6 +38,8 @@ df = pd.DataFrame(testlist,columns=["review_no", "phrase_no", "phrase"])
 data = list(df["phrase"])
 data = [re.sub(r'[^\w\s]','',str(item)) for item in data]
 data = [x.lower() for x in data]
+#only consider half the data:
+data = data[:len(data)//2]
 ##bert setup
 BERT_VOCAB = 'cased_L-12_H-768_A-12/vocab.txt'
 BERT_INIT_CHKPNT = 'cased_L-12_H-768_A-12/bert_model.ckpt'
