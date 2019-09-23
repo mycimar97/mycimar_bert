@@ -1,5 +1,6 @@
 from pprint import pprint #prettyprint - makes the output easier to read
 from nltk.corpus import stopwords # To remove stopwords
+import nltk
 import pandas as pd
 from bert import tokenization
 from bert import modeling
@@ -7,20 +8,36 @@ import numpy as np
 import bert_funcs
 from sklearn.cluster import KMeans
 from tqdm import tqdm
+import pickle
 import re
 pd.set_option('display.max_columns', None)
 nltk.download('stopwords')
 stopwords = set(stopwords.words("english"))
 
-with open('reviews_as_raw_text.txt') as fopen:
-    negative = fopen.read().split('\n')[:-1]
-negative = [re.sub(r'[^\w\s]','',str(item)) for item in negative]
-test = []
-for x in negative:
-    if len(x) < 500:
-        test.append(x)
+#with open('/content/reviews_as_raw_text.txt') as fopen:
+#    reviews = fopen.read().split('\n')[:-1]
+#df = pd.DataFrame({"review_text":reviews})
+#testliste = []
+#testliste2 = []
+#for index, review in enumerate(df["review_text"]):
+#    rev_doc = nlp(review)
+#    testliste2 = ([sent.string.strip() for sent in rev_doc.sents])
+#    testliste.append(testliste2)
+#pprint(testliste)
+#final_list = testliste
+with open ('outfile', 'rb') as fp:
+     itemlist = pickle.load(fp)
+testlist = []
+temp = []
+for index, review in enumerate(itemlist):
+    for index2,r in enumerate(review):
+        temp=[index+1,index2+1,r]
+        testlist.append(temp)
+df = pd.DataFrame(testlist,columns=["review_no", "phrase_no", "phrase"])
 
-negative = test
+data = list(df["phrase"])
+data = [re.sub(r'[^\w\s]','',str(item)) for item in data]
+data = [x.lower() for x in data]
 ##bert setup
 BERT_VOCAB = 'cased_L-12_H-768_A-12/vocab.txt'
 BERT_INIT_CHKPNT = 'cased_L-12_H-768_A-12/bert_model.ckpt'
@@ -35,10 +52,10 @@ batch_size = 5
 ngram = (1,3)
 n_topics = 3
 rows, attentions = [], []
-for i in tqdm(range(0, len(negative), batch_size)):
-    index = min(i + batch_size, len(negative))
-    rows.append(model.vectorize(negative[i:index]))
-    attentions.extend(model.attention(negative[i:index]))
+for i in tqdm(range(0, len(data), batch_size)):
+    index = min(i + batch_size, len(data))
+    rows.append(model.vectorize(data[i:index]))
+    attentions.extend(model.attention(data[i:index]))
 
 
 concat = np.concatenate(rows, axis = 0)
